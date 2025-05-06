@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Playlists - Spotify Shuffler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #1DB954;
+            text-align: center;
+        }
+        .playlist {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .playlist img {
+            width: 60px;
+            height: 60px;
+            margin-right: 15px;
+        }
+        .playlist-info {
+            flex-grow: 1;
+        }
+        .playlist-name {
+            font-weight: bold;
+            margin: 0;
+        }
+        .playlist-tracks {
+            color: #666;
+            margin: 5px 0;
+        }
+        .shuffle-button {
+            background-color: #1DB954;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .shuffle-button:hover {
+            background-color: #1ed760;
+        }
+        .back-button {
+            display: inline-block;
+            color: #1DB954;
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('home') }}" class="back-button">← Back to Home</a>
+        <h1>My Playlists</h1>
+        {% for playlist in playlists %}
+        <div class="playlist">
+            {% if playlist.images %}
+            <img src="{{ playlist.images[0].url }}" alt="{{ playlist.name }}">
+            {% endif %}
+            <div class="playlist-info">
+                <p class="playlist-name">{{ playlist.name }}</p>
+                <p class="playlist-tracks">{{ playlist.tracks.total }} tracks</p>
+            </div>
+            <a href="{{ url_for('shuffle_playlist', playlist_id=playlist.id) }}" class="shuffle-button">Shuffle</a>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html> 

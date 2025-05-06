@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Playlist Shuffler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #1DB954;
+            text-align: center;
+        }
+        .button {
+            display: inline-block;
+            background-color: #1DB954;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 20px;
+            margin: 10px 0;
+        }
+        .button:hover {
+            background-color: #1ed760;
+        }
+        .center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Spotify Playlist Shuffler</h1>
+        {% if not logged_in %}
+            <div class="center">
+                <p>Login with Spotify to shuffle your playlists</p>
+                <a href="{{ url_for('login') }}" class="button">Login with Spotify</a>
+            </div>
+        {% else %}
+            <div class="center">
+                <p>Welcome! You can now manage your playlists.</p>
+                <a href="{{ url_for('get_playlists') }}" class="button">View My Playlists</a>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html> 
