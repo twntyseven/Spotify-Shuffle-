@@ -62,12 +62,29 @@
             text-decoration: none;
             margin-bottom: 20px;
         }
+        .flash-message {
+            background-color: #1DB954;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <a href="{{ url_for('home') }}" class="back-button">← Back to Home</a>
         <h1>My Playlists</h1>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="flash-message">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
         {% for playlist in playlists %}
         <div class="playlist">
             {% if playlist.images %}

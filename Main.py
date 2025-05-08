@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, url_for
+from flask import Flask, render_template, request, redirect, session, url_for, flash
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import os
@@ -14,7 +14,7 @@ app.secret_key = os.urandom(24)
 # Spotify API credentials
 SPOTIPY_CLIENT_ID = os.getenv('SPOTIPY_CLIENT_ID')
 SPOTIPY_CLIENT_SECRET = os.getenv('SPOTIPY_CLIENT_SECRET')
-SPOTIPY_REDIRECT_URI = 'http://localhost:5000/callback'
+SPOTIPY_REDIRECT_URI = 'http://127.0.0.1:5000/callback'
 
 # Initialize Spotify OAuth
 sp_oauth = SpotifyOAuth(
@@ -59,29 +59,50 @@ def shuffle_playlist(playlist_id):
     
     sp = spotipy.Spotify(auth=session['token_info']['access_token'])
     
-    # Get playlist tracks
+    # Get playlist info for the name
+    playlist = sp.playlist(playlist_id)
+    playlist_name = playlist['name']
+    
+    # Get all playlist tracks
+    tracks = []
     results = sp.playlist_tracks(playlist_id)
-    tracks = results['items']
+    tracks.extend(results['items'])
+    
+    # Keep getting tracks until we have all of them
     while results['next']:
         results = sp.next(results)
         tracks.extend(results['items'])
     
     # Extract track URIs
     track_uris = [item['track']['uri'] for item in tracks if item['track'] is not None]
+    total_tracks = len(track_uris)
     
-    # Custom shuffle algorithm (Fisher-Yates shuffle)
-    for i in range(len(track_uris)-1, 0, -1):
+    # Split into batches of 100 and shuffle each batch
+    batches = []
+    for i in range(0, total_tracks, 100):
+        batch = track_uris[i:i+100]
+        # Shuffle this batch
+        for j in range(len(batch)-1, 0, -1):
+            k = random.randint(0, j)
+            batch[j], batch[k] = batch[k], batch[j]
+        batches.append(batch)
+    
+    # Shuffle the order of the batches themselves
+    for i in range(len(batches)-1, 0, -1):
         j = random.randint(0, i)
-        track_uris[i], track_uris[j] = track_uris[j], track_uris[i]
+        batches[i], batches[j] = batches[j], batches[i]
     
-    # Remove all tracks from playlist
-    sp.playlist_replace_items(playlist_id, [])
+    # Flatten the batches back into a single list
+    shuffled_tracks = [track for batch in batches for track in batch]
     
-    # Add tracks back in new order
-    # Spotify API has a limit of 100 tracks per request
-    for i in range(0, len(track_uris), 100):
-        sp.playlist_add_items(playlist_id, track_uris[i:i+100])
+    # Clear the current queue
+    sp._put("me/player/queue", None)
     
+    # Add tracks to queue in shuffled order
+    for track_uri in shuffled_tracks:
+        sp.add_to_queue(track_uri)
+    
+    flash(f'Successfully shuffled queue for playlist: {playlist_name} ({total_tracks} tracks)')
     return redirect(url_for('get_playlists'))
 
 if __name__ == '__main__':
