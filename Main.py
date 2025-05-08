@@ -57,6 +57,7 @@ def shuffle_playlist(playlist_id):
     if 'token_info' not in session:
         return redirect(url_for('login'))
     
+    mode = request.args.get('mode', 'playlist')  # Default to playlist mode
     sp = spotipy.Spotify(auth=session['token_info']['access_token'])
     
     # Get playlist info for the name
@@ -95,14 +96,29 @@ def shuffle_playlist(playlist_id):
     # Flatten the batches back into a single list
     shuffled_tracks = [track for batch in batches for track in batch]
     
-    # Clear the current queue
-    sp._put("me/player/queue", None)
+    if mode == 'playlist':
+        # Remove all tracks from playlist
+        sp.playlist_replace_items(playlist_id, [])
+        
+        # Add tracks back in new order
+        for i in range(0, len(shuffled_tracks), 100):
+            batch = shuffled_tracks[i:i+100]
+            sp.playlist_add_items(playlist_id, batch)
+        
+        flash(f'Successfully shuffled playlist: {playlist_name} ({total_tracks} tracks)')
+    else:  # queue mode
+        try:
+            # Clear the current queue
+            sp._put("me/player/queue", None)
+            
+            # Add tracks to queue in shuffled order
+            for track_uri in shuffled_tracks:
+                sp.add_to_queue(track_uri)
+            
+            flash(f'Successfully shuffled queue for playlist: {playlist_name} ({total_tracks} tracks)')
+        except Exception as e:
+            flash(f'Error shuffling queue: Make sure Spotify is open and playing music')
     
-    # Add tracks to queue in shuffled order
-    for track_uri in shuffled_tracks:
-        sp.add_to_queue(track_uri)
-    
-    flash(f'Successfully shuffled queue for playlist: {playlist_name} ({total_tracks} tracks)')
     return redirect(url_for('get_playlists'))
 
 if __name__ == '__main__':

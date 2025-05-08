@@ -45,6 +45,10 @@
             color: #666;
             margin: 5px 0;
         }
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
         .shuffle-button {
             background-color: #1DB954;
             color: white;
@@ -52,9 +56,24 @@
             padding: 8px 16px;
             border-radius: 20px;
             cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
         }
         .shuffle-button:hover {
             background-color: #1ed760;
+        }
+        .queue-button {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .queue-button:hover {
+            background-color: #1557b0;
         }
         .back-button {
             display: inline-block;
@@ -94,7 +113,10 @@
                 <p class="playlist-name">{{ playlist.name }}</p>
                 <p class="playlist-tracks">{{ playlist.tracks.total }} tracks</p>
             </div>
-            <a href="{{ url_for('shuffle_playlist', playlist_id=playlist.id) }}" class="shuffle-button">Shuffle</a>
+            <div class="button-group">
+                <a href="{{ url_for('shuffle_playlist', playlist_id=playlist.id, mode='playlist') }}" class="shuffle-button">Shuffle Playlist</a>
+                <a href="{{ url_for('shuffle_playlist', playlist_id=playlist.id, mode='queue') }}" class="queue-button">Shuffle Queue</a>
+            </div>
         </div>
         {% endfor %}
     </div>
